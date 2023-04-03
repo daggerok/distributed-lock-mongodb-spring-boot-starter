@@ -7,48 +7,54 @@
         <version>2.7.9</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+    <modules>
+        <module>distributed-lock-mongodb</module>
+        <module>distributed-lock-mongodb-spring-boot-starter</module>
+    </modules>
+    <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.daggerok</groupId>
-    <artifactId>spring-boot-mongo-lock</artifactId>
+    <artifactId>distributed-lock-mongodb-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
     <properties>
         <java.version>1.8</java.version>
-        <vavr.version>0.10.2</vavr.version>
+        <vavr.version>0.10.4</vavr.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <spring-web.version>6.0.7</spring-web.version>
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.daggerok</groupId>
+                <artifactId>distributed-lock-mongodb</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>io.github.daggerok</groupId>
+                <artifactId>distributed-lock-mongodb-docker</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>io.github.daggerok</groupId>
+                <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.vavr</groupId>
-            <artifactId>vavr</artifactId>
-            <version>${vavr.version}</version>
-        </dependency>
-        <!---->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -56,11 +62,6 @@
             <scope>provided</scope>
         </dependency>
         <!---->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -72,18 +73,27 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <build>
         <defaultGoal>clean verify</defaultGoal>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <jmxPort>9090</jmxPort>
+                        <executable>true</executable>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                                <goal>build-info</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
