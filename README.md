@@ -1,4 +1,6 @@
 # spring-boot-mongo-lock [![tests](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml)
+Custom written `Distributed Lock` starter based on `Spring Boot` and `MongoTemplate` with `Testcontainers` integration
+testing and fabric8 `docker-maven-plugin`
 
 ```bash
 ./mvnw clean ; ./mvnw -U
