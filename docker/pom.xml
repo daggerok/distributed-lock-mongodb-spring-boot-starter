@@ -10,7 +10,7 @@
     </parent>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>docker</artifactId>
+    <artifactId>distributed-lock-mongodb-docker</artifactId>
     <description>Development docker container maven module</description>
     <properties>
         <mongo.docker.name>mongo:4.4.2</mongo.docker.name>

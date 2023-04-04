@@ -3,6 +3,8 @@ A `distributed-lock-mongodb-spring-boot-starter` repository project contains cus
 based on `Spring Boot` and `MongoTemplate` with `Testcontainers` integration testing and fabric8 `docker-maven-plugin`
 maven module to help run example showcase application uses mongo docker container
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.daggerok/distributed-lock-mongodb-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.daggerok%22%20AND%20a:%22distributed-lock-mongodb-spring-boot-starter%22)
+
 ```bash
 ./mvnw clean ; ./mvnw -U
 ```

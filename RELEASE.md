@@ -1,24 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.9</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
-    <modules>
-        <module>docker</module>
-        <module>distributed-lock-mongodb</module>
-        <module>distributed-lock-mongodb-spring-boot-starter</module>
-        <module>distributed-lock-mongodb-spring-boot-starter-example</module>
-    </modules>
-    <packaging>pom</packaging>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.daggerok</groupId>
-    <artifactId>distributed-lock-mongodb-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+# Publish artifacts to maven central repository
+
+To publish your artifacts into maven central repository you have to prepare your java project repo accordingly:
+
+* Create JIRA and requires to create repository for you.
+  After JIRA gets created you must create empty public repository like these:
+  * https://github.com/daggerok/OSSRH-81403
+  * https://github.com/daggerok/OSSRH-90442
+* Update your [pom.xml](pom.xml) file with next information:
+  ```xml
     <name>${project.groupId}:${project.artifactId}</name>
     <description>${project.groupId}:${project.artifactId}</description>
     <url>https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter</url>
@@ -50,89 +39,13 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <java.version>1.8</java.version>
-        <vavr.version>0.10.4</vavr.version>
-        <spring-web.version>6.0.7</spring-web.version>
-        <testcontainers.version>1.17.6</testcontainers.version>
-        <docker-maven-plugin.version>0.42.0</docker-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
         <gpg.skip>true</gpg.skip>
         <javadoc.opts/>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-docker</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-spring-boot-starter-example</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-        <!---->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
     <build>
-        <defaultGoal>clean verify</defaultGoal>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>repackage</goal>
-                                <goal>build-info</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -348,4 +261,33 @@
             </build>
         </profile>
     </profiles>
-</project>
+  ```
+* Create or update your `~/.m2/settings.xml` file accordingly to [.mvn/settings.xml](.mvn/settings.xml):
+  ```xml
+  <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                https://maven.apache.org/xsd/settings-1.0.0.xsd">
+      <servers>
+          <server>
+              <id>ossrh</id>
+              <username>${sonatype username}</username>
+              <password>${sonatype password}</password>
+          </server>
+      </servers>
+  </settings>
+  ```
+* Create [.bin](.bin) scripts to simplify release process
+* Add maven central badge to your `README.md` file:
+  ```markdown
+  [![Maven Central](https://img.shields.io/maven-central/v/io.github.daggerok/distributed-lock-mongodb-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.daggerok%22%20AND%20a:%22distributed-lock-mongodb-spring-boot-starter%22)
+  ```
+* Finally, when everything is ready for release run:
+  * next command to build and upload SNAPSHOT version:
+    ```bash
+    GPG_PASSPHRASE=YourGpgPassword bash .bin/central-snapshot.sh -DskipTests
+    ```
+  * next command to build and upload release version:
+    ```bash
+    GPG_PASSPHRASE=YourGpgPassword bash .bin/central-release.sh -DskipTests
+    ```
