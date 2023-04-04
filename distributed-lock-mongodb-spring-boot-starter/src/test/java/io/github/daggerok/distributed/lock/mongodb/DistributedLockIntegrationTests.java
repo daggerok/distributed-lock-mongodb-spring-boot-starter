@@ -41,7 +41,6 @@ class DistributedLockIntegrationTests {
             .waitingFor(new HostPortWaitStrategy())
             .withAccessToHost(true);
 
-    MongoClient mongoClient;
     MongoTemplate mongoTemplate;
     DistributedLock distributedLock;
     DistributedLockProperties props;
