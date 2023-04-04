@@ -12,6 +12,7 @@
         <module>docker</module>
         <module>distributed-lock-mongodb</module>
         <module>distributed-lock-mongodb-spring-boot-starter</module>
+        <module>distributed-lock-mongodb-spring-boot-starter-example</module>
     </modules>
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
@@ -23,9 +24,9 @@
     <properties>
         <java.version>1.8</java.version>
         <vavr.version>0.10.4</vavr.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
         <spring-web.version>6.0.7</spring-web.version>
         <testcontainers.version>1.17.6</testcontainers.version>
+        <docker-maven-plugin.version>0.42.0</docker-maven-plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -82,10 +83,6 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <jmxPort>9090</jmxPort>
-                        <executable>true</executable>
-                    </configuration>
                     <executions>
                         <execution>
                             <goals>

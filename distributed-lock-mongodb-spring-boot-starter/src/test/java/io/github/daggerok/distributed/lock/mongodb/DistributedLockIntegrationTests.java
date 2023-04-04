@@ -1,6 +1,5 @@
 package io.github.daggerok.distributed.lock.mongodb;
 
-import com.mongodb.client.MongoClient;
 import io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties;
 import java.io.Serializable;
 import java.time.Instant;

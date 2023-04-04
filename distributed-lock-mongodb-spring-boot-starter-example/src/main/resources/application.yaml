@@ -1,0 +1,15 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+logging:
+  level:
+    root: info
+    io.github.daggerok: trace
+io:
+  github:
+    daggerok:
+      distributed:
+        lock:
+          mongodb:
+            lock-period: 2m

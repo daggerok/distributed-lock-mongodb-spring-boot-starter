@@ -1,22 +1,36 @@
-# spring-boot-mongo-lock [![tests](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml)
-Custom written `Distributed Lock` starter based on `Spring Boot` and `MongoTemplate` with `Testcontainers` integration
-testing and fabric8 `docker-maven-plugin`
+# distributed-lock-mongodb [![tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml) [![integration tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml)
+A `distributed-lock-mongodb-spring-boot-starter` repository project contains custom written `Distributed Lock` starter
+based on `Spring Boot` and `MongoTemplate` with `Testcontainers` integration testing and fabric8 `docker-maven-plugin`
+maven module to help run example showcase application uses mongo docker container
 
 ```bash
 ./mvnw clean ; ./mvnw -U
 ```
 
-## Example app
+## Build, run and test example application
 
 ```bash
-mvn -f docker                                               docker:start
-mvn -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:start
+#brew reinstall httpie jq
 
-mvn -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
-mvn -f docker                                               docker:stop
+killall -9 java
+./mvnw -f docker docker:stop
+rm -rfv ~/.m2/repository/io/github/daggerok/distributed-lock-mongodb-spring-boot-starter
+
+./mvnw clean ; ./mvnw -DskipTests install
+./mvnw -f docker                                                    docker:start
+./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:start
+
+http -I get :8080/get-state/daggerok
+http -I post :8080/post-state/daggerok/initialize-state
+
+id=`http -I post :8080/post-lock/daggerok | jq -r '.id'`
+http -I post :8080/post-state/daggerok/this-should-not-work
+http -I post :8080/post-unlock-by-id/${id}
+http -I post :8080/post-state/daggerok/but-now-this-should-work
+
+./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
+./mvnw -f docker                                                    docker:stop
 ```
-
-This repository demonstrates how to implement distributed lock with mongo db and mongoTemplate from spring
 
 <!--
 

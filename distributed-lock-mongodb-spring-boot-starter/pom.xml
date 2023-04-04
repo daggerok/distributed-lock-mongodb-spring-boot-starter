@@ -11,6 +11,7 @@
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
+    <description>Spring boot distributed-lock-mongodb auto-configuration module</description>
     <dependencies>
         <dependency>
             <groupId>io.github.daggerok</groupId>
@@ -28,23 +29,11 @@
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
-        <!---->
+        <!--suppress VulnerableLibrariesLocal: checkmarx vulnerability report. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <!-- checkmarx vulnerability report. safe version: 2.0 -->
-                <exclusion>
-                    <groupId>org.yaml</groupId>
-                    <artifactId>snakeyaml</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>${snakeyaml.version}</version>
         </dependency>
     </dependencies>
 </project>

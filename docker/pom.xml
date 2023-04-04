@@ -10,7 +10,8 @@
     </parent>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>distributed-lock-mongodb-docker</artifactId>
+    <artifactId>docker</artifactId>
+    <description>Development docker container maven module</description>
     <properties>
         <mongo.docker.name>mongo:4.4.2</mongo.docker.name>
         <mongo.docker.ports.1>27017:27017</mongo.docker.ports.1>
@@ -23,8 +24,7 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <!--<version>0.28.0</version>-->
-                <version>0.42.0</version>
+                <version>${docker-maven-plugin.version}</version>
                 <configuration>
                     <allContainers>true</allContainers>
                     <removeVolumes>true</removeVolumes>

@@ -11,6 +11,7 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.ExecutableFindOperation;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -43,7 +44,10 @@ public class DistributedLock {
      */
     public Optional<Lock> acquire(Lock lockConfig) {
         Lock lock = Optional.ofNullable(lockConfig).orElseThrow(LockException::lockIsRequired);
-        return tryLock(lock);
+        return tryLock(lock).map(Lock::getId)
+                .map(Criteria.where("id")::is)
+                .map(mongoTemplate.query(Lock.class)::matching)
+                .flatMap(ExecutableFindOperation.TerminatingFind::one);
     }
 
     /**
@@ -183,7 +187,7 @@ public class DistributedLock {
      */
     long countLocks(Lock lock) {
         long count = mongoTemplate.query(Lock.class).matching(lockedBy.apply(lock)).count();
-        log.debug("Found: {} for {} criteria", count, lock.lockedBy);
+        log.debug("Found {} locks for '{}' lockedBy criteria", count, lock.lockedBy);
         return count;
     }
 
