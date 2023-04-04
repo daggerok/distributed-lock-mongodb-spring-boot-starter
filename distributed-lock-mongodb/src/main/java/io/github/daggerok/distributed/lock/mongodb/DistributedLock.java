@@ -23,7 +23,7 @@ public class DistributedLock {
     private static final Function<Lock, Criteria> lockedBy = lock -> Criteria.where("lockedBy").is(lock.lockedBy);
 
     private final MongoTemplate mongoTemplate;
-    private final Duration lockPeriod;
+    private final Duration defaultLockPeriod;
 
     /**
      * Try to acquire a lock according to given config.
@@ -170,7 +170,7 @@ public class DistributedLock {
      * @see DistributedLock#acquire(Duration, Serializable[])
      */
     Optional<Lock> tryLock(Lock lock) {
-        Duration lockPeriod = Optional.ofNullable(lock.lockPeriod).orElse(this.lockPeriod);
+        Duration lockPeriod = Optional.ofNullable(lock.lockPeriod).orElse(this.defaultLockPeriod);
         // if no locks available: create it at first time, otherwise try to acquire existing lock
         return countLocks(lock) < 1 ? createNewLock(lock, lockPeriod) : acquireExistingLock(lock, lockPeriod);
     }
