@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.daggerok</groupId>
     <artifactId>distributed-lock-mongodb-parent</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>${project.groupId}:${project.artifactId}</description>
     <url>https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter</url>

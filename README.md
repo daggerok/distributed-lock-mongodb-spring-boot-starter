@@ -1,59 +1,123 @@
-# distributed-lock-mongodb [![tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml) [![integration tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml)
+# MongoDB distributed lock [![tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/tests.yml) [![integration tests](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/actions/workflows/integration-tests.yml)
 A `distributed-lock-mongodb-spring-boot-starter` repository project contains custom written `Distributed Lock` starter
 based on `Spring Boot` and `MongoTemplate` with `Testcontainers` integration testing and fabric8 `docker-maven-plugin`
 maven module to help run example showcase application uses mongo docker container
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.daggerok/distributed-lock-mongodb-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.daggerok%22%20AND%20a:%22distributed-lock-mongodb-spring-boot-starter%22)
 
-```bash
-./mvnw clean ; ./mvnw -U
+## Installation
+
+```xml
+<dependency>
+    <groupId>io.github.daggerok</groupId>
+    <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
+    <version>RELEASE</version>
+</dependency>
 ```
 
-## Build, run and test example application
+Or:
 
-```bash
-#brew reinstall httpie jq
+```xml
 
-killall -9 java
-./mvnw -f docker docker:stop
-rm -rfv ~/.m2/repository/io/github/daggerok/distributed-lock-mongodb-spring-boot-starter
-
-./mvnw clean ; ./mvnw -DskipTests install
-./mvnw -f docker                                                    docker:start
-./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:start
-
-http -I get :8080/get-state/daggerok
-http -I post :8080/post-state/daggerok/initialize-state
-
-id=`http -I post :8080/post-lock/daggerok | jq -r '.id'`
-http -I post :8080/post-state/daggerok/this-should-not-work
-http -I post :8080/post-unlock-by-id/${id}
-http -I post :8080/post-state/daggerok/but-now-this-should-work
-
-./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
-./mvnw -f docker                                                    docker:stop
+<dependency>
+    <groupId>io.github.daggerok</groupId>
+    <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
+    <version>LATEST</version>
+</dependency>
 ```
 
-<!--
+...if you need SNAPSHOT
 
-# Read Me First
-The following was discovered as part of building this project:
+## Supported operations
 
-* The JVM level was changed from '1.8' to '17', review the [JDK Version Range](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions#jdk-version-range) on the wiki for more details.
+* Acquire lock (try lock)
+* Release lock (try to unlock)
+* Acquire lock and consume (only if lock was acquired)
+* Acquire lock and supply value (only if lock was acquired)
 
-# Getting Started
+## Usage
 
-### Reference Documentation
-For further reference, please consider the following sections:
+### Inject distributed lock
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.5/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.5/maven-plugin/reference/html/#build-image)
-* [Testcontainers MongoDB Module Reference Guide](https://www.testcontainers.org/modules/databases/mongodb/)
-* [Testcontainers](https://www.testcontainers.org/)
-* [Thymeleaf](https://docs.spring.io/spring-boot/docs/3.0.5/reference/htmlsingle/#web.servlet.spring-mvc.template-engines)
-* [Spring Data MongoDB](https://docs.spring.io/spring-boot/docs/3.0.5/reference/htmlsingle/#data.nosql.mongodb)
-* [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
-* [Accessing Data with MongoDB](https://spring.io/guides/gs/accessing-data-mongodb/)
+A `DistributedLockAutoConfiguration` will provide `DistributedLock` you can use as locking implementation.
 
--->
+Feel free to simply inject it by defined single constructor in your spring Bean:
+
+```java
+@Service
+public class MyService {
+
+    @Autowired
+    private MyService myService;
+
+    // skipped...
+}
+```
+
+Or you can inject it using `@Auqtowired annotation` by field injection (not recommended):
+
+```java
+@Service
+public class MyService {
+
+    private final MyService myService;
+
+    public MyService(MyService myService) {
+        this.myService = myService;
+    }
+
+    // skipped...
+}
+```
+
+Or query it from `ApplicationContext` directly:
+
+```java
+@SpringBootApplication
+public class MyApplication {
+    public static void main(String[] args) {
+        var context = SpringApplication.run(ExampleApplication.class, args);
+        var distributedLock = context.getBean(DistributedLock.class);
+        // skipped...
+    }
+}
+```
+
+### acquire(Lock config)
+
+Acquire lock (try lock)
+
+```java
+Optional<Lock> maybeLock = distributedLock.acquire(Lock.of(identifier));
+        if (maybeLock.isPresent()) log.debug("Lock was acquired.");
+        else log.warn("Lock can't be acquired...");
+```
+
+### release(String lockId)
+
+Release lock (try to unlock)
+
+```java
+Optional<Lock> maybeUnlock = distributedLock.release("642b52e873d0ec7cd4463f05")
+if (maybeUnlock.isPresent()) log.debug("Lock was released.");
+else log.warn("Can't release lock...");
+```
+
+### acquireAndRun
+
+Acquire lock and consume (only if lock was acquired)
+
+```java
+Optional<Boolean> maybeSync = distributedLock.acquireAndGet(Lock.of("sync"), () -> leaderElection.sync());
+if (maybeSync.isPresent()) log.debug("Data synchronization was completed")
+else log.warn("Data wasn't synced");
+```
+
+### acquireAndGet
+
+Acquire lock and supply value (only if lock was acquired)
+
+```java
+Optional<SyncResult> syncResult = distributedLock.acquireAndGet(Lock.of("ETL"), () -> syncService.etl());
+maybeResult.ifPresent(result -> log.debug("Synchronization complete with: {}", result));
+```

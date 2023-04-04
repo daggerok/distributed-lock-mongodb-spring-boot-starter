@@ -122,7 +122,7 @@ public class DistributedLock {
      * Usage:
      *
      * <pre>
-     *     Optional<Boolean> = distributedLock.acquireAndGet(Lock.of("masterLeaderSync"), () ->
+     *     Optional<Boolean> maybeSync = distributedLock.acquireAndGet(Lock.of("masterLeaderSync"), () ->
      *         businessService.masterLeaderSync()
      *     );
      * </pre>
