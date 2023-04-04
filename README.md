@@ -1,13 +1,17 @@
 # spring-boot-mongo-lock [![tests](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml/badge.svg)](https://github.com/daggerok/spring-boot-mongo-lock/actions/workflows/tests.yml)
 
+```bash
+./mvnw clean ; ./mvnw -U
+```
+
 ## Example app
 
 ```bash
-mvn -f distributed-lock-mongodb-docker                      docker:start
+mvn -f docker                                               docker:start
 mvn -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:start
 
 mvn -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
-mvn -f distributed-lock-mongodb-docker                      docker:stop
+mvn -f docker                                               docker:stop
 ```
 
 This repository demonstrates how to implement distributed lock with mongo db and mongoTemplate from spring

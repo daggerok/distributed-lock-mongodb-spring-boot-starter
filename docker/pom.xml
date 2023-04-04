@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.github.daggerok</groupId>
+        <artifactId>distributed-lock-mongodb-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>distributed-lock-mongodb-docker</artifactId>
+    <properties>
+        <mongo.docker.name>mongo:4.4.2</mongo.docker.name>
+        <mongo.docker.ports.1>27017:27017</mongo.docker.ports.1>
+        <mongo.docker.log.prefix>mongo</mongo.docker.log.prefix>
+        <mongo.docker.wait.log>Waiting for connections</mongo.docker.wait.log>
+        <mongo.docker.wait.time>10000</mongo.docker.wait.time>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <!--<version>0.28.0</version>-->
+                <version>0.42.0</version>
+                <configuration>
+                    <allContainers>true</allContainers>
+                    <removeVolumes>true</removeVolumes>
+                    <watchInterval>500</watchInterval>
+                    <logDate>default</logDate>
+                    <verbose>true</verbose>
+                    <autoPull>always</autoPull>
+                    <images>
+                        <image>
+                            <external>
+                                <type>properties</type>
+                                <prefix>mongo.docker</prefix>
+                            </external>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

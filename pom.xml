@@ -8,6 +8,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <modules>
+        <module>docker</module>
         <module>distributed-lock-mongodb</module>
         <module>distributed-lock-mongodb-spring-boot-starter</module>
     </modules>
