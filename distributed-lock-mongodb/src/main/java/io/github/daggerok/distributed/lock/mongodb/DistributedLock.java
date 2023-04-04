@@ -6,6 +6,7 @@ import io.vavr.control.Try;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,10 @@ public class DistributedLock {
      */
     public Optional<Lock> acquire(Lock lockConfig) {
         Lock lock = Optional.ofNullable(lockConfig).orElseThrow(LockException::lockIsRequired);
-        return tryLock(lock).map(Lock::getId)
-                .map(Criteria.where("id")::is)
-                .map(mongoTemplate.query(Lock.class)::matching)
-                .flatMap(ExecutableFindOperation.TerminatingFind::one);
+        Optional<Lock> maybePrevious = tryLock(lock);
+        Optional<Lock> maybeAcquired = queryCurrent(maybePrevious);
+        maybeAcquired.ifPresent(it -> log.debug("Lock {} acquired", it));
+        return maybeAcquired;
     }
 
     /**
@@ -112,8 +113,7 @@ public class DistributedLock {
      */
     public <T> Optional<T> acquireAndGet(Lock lockConfig, CheckedFunction0<T> execution) {
         CheckedFunction0<T> anExecution = Optional.ofNullable(execution).orElseThrow(LockException::executionIsRequired);
-        Optional<Lock> maybeLock = acquire(lockConfig);
-        return maybeLock.flatMap(it -> executeAndRelease(it.id, anExecution));
+        return acquire(lockConfig).flatMap(it -> executeAndRelease(it.id, anExecution));
     }
 
     /**
@@ -133,8 +133,7 @@ public class DistributedLock {
      */
     public <T> Optional<Boolean> acquireAndRun(Lock lockConfig, CheckedRunnable runnable) {
         CheckedRunnable aRunnable = Optional.ofNullable(runnable).orElseThrow(LockException::runnableIsRequired);
-        Optional<Lock> maybeLock = acquire(lockConfig);
-        return maybeLock.flatMap(it -> runAndRelease(it.id, aRunnable));
+        return acquire(lockConfig).flatMap(it -> runAndRelease(it.id, aRunnable));
     }
 
     /**
@@ -152,13 +151,28 @@ public class DistributedLock {
      */
     public Optional<Lock> release(String lockId) {
         String id = Optional.ofNullable(lockId).orElseThrow(LockException::lockIdIsRequired);
-        Optional<Lock> lock = mongoTemplate.update(Lock.class)
+        Optional<Lock> maybePrevious = mongoTemplate.update(Lock.class)
                 .matching(Criteria.where("id").is(id))
                 .apply(Update.update("state", Lock.State.NONE).set("lastModifiedAt", Instant.now()))
-                .findAndModify()
-                .flatMap(it -> mongoTemplate.query(Lock.class).matching(Criteria.where("id").is(it.id)).one());
-        lock.ifPresent(it -> log.debug("Lock {} released", it));
-        return lock;
+                .findAndModify();
+        Optional<Lock> maybeReleased = queryCurrent(maybePrevious);
+        maybeReleased.ifPresent(it -> log.debug("Lock {} released", it));
+        return maybeReleased;
+    }
+
+    /**
+     * DRY-code method to query lock state by its ID.
+     *
+     * @param previous - previous {@link Optional} instance of type {@link Lock} to be used for getting ID
+     * @return {@link Optional} of current {@link Lock} state or {@link Optional#empty()} otherwise
+     */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    Optional<Lock> queryCurrent(Optional<Lock> previous) {
+        Objects.requireNonNull(previous, "Optional may not be null");
+        return previous.map(Lock::getId)
+                .map(Criteria.where("id")::is)
+                .map(mongoTemplate.query(Lock.class)::matching)
+                .flatMap(ExecutableFindOperation.TerminatingFind::one);
     }
 
     // package-private APIs and helper DRY-code reusable methods
