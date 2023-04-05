@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockAutoConfiguration
