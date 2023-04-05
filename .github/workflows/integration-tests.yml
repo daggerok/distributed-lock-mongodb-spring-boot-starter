@@ -18,6 +18,7 @@ jobs:
           # 'temurin' 'zulu' 'adopt' 'adopt-hotspot' 'adopt-openj9' 'liberica' 'microsoft'
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
+      - uses: actions/setup-node@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -29,9 +30,11 @@ jobs:
       - run: command -v http >/dev/null 2>&1 || { echo >&2 "HTTPie is required but not installed.  Aborting."; exit 1; }
       - run: command -v jq >/dev/null 2>&1 || { echo >&2 "jq is required but not installed.  Aborting."; exit 1; }
       - run: sudo rm -rfv ~/.m2/repository/io/github/daggerok
-      - run: cd $GITHUB_WORKSPACE ; ./mvnw clean ; ./mvnw install -DskipTests
+      - run: cd $GITHUB_WORKSPACE ; ./mvnw clean ; ./mvnw package -DskipTests
       - run: cd $GITHUB_WORKSPACE ; ./mvnw -f docker docker:start
-      - run: cd $GITHUB_WORKSPACE ; ./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:start
+      - run: sudo rm -rfv $GITHUB_WORKSPACE/distributed-lock-mongodb-spring-boot-starter-example/target/*{javadoc.jar,sources.jar,jar.original}
+      - run: java -jar $GITHUB_WORKSPACE/distributed-lock-mongodb-spring-boot-starter-example/target/*.jar &
+      - run: npm_config_yes=true npx wait-port 8080
       - run: http -I get :8080/get-state/daggerok
       - run: http -I post :8080/post-state/daggerok/initialize-state
       - run: |
@@ -40,5 +43,3 @@ jobs:
          http -I post :8080/post-state/daggerok/this-should-not-work     ;
          http -I post :8080/post-unlock-by-id/${id}                      ;
       - run: http -I post :8080/post-state/daggerok/but-now-this-should-work
-      - run: cd $GITHUB_WORKSPACE ; ./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
-      - run: cd $GITHUB_WORKSPACE ; ./mvnw -f docker docker:stop
