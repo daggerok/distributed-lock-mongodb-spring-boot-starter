@@ -20,7 +20,7 @@
     <artifactId>distributed-lock-mongodb-parent</artifactId>
     <version>3.0.5-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Distributed Lock based on MongoDB and Spring Boot 3</description>
+    <description>Distributed Lock based on MongoDB and Spring Boot 3.0.x</description>
     <url>https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter</url>
     <developers>
         <developer>
@@ -59,7 +59,6 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
         <gpg.skip>true</gpg.skip>
-        <javadoc.opts/>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -155,7 +154,6 @@
                     <doclint>none</doclint>
                     <failOnError>false</failOnError>
                     <failOnWarnings>false</failOnWarnings>
-                    <additionalJOption>${javadoc.opts}</additionalJOption>
                 </configuration>
             </plugin>
             <plugin>
@@ -203,15 +201,6 @@
         </plugins>
     </reporting>
     <profiles>
-        <profile>
-            <id>java8-doclint-disabled</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <javadoc.opts>-Xdoclint:none</javadoc.opts>
-            </properties>
-        </profile>
         <profile>
             <id>java17-requires-jackarta-servlet</id>
             <activation>
