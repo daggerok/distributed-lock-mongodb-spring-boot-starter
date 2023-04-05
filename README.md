@@ -9,18 +9,11 @@ maven module to help run example showcase application uses mongo docker containe
 
 We support next version convention:
 
-| Distributed Lock version | Spring Bott version | GitHub branch             |
+| Distributed Lock version | Spring Boot version | GitHub branch             |
 |--------------------------|---------------------|---------------------------|
-| 3.0.5                    | 3.0.5               | master, spring-boot-3.0.x |
-| 2.7.10                   | 2.7.10              | spring-boot-2.7.x         |
-| 2.6.14                   | 2.6.14              | spring-boot-2.6.x         |
-| 2.5.14                   | 2.5.14              | spring-boot-2.5.x         |
-| 2.4.13                   | 2.4.13              | spring-boot-2.4.x         |
-| 2.3.12                   | 2.3.12.RELEASE      | spring-boot-2.3.x         |
 | 2.2.13                   | 2.2.13.RELEASE      | spring-boot-2.2.x         |
-| 0.0.3                    | 2.7.10              | master                    |
-| 0.0.2                    | 2.7.9               | master                    |
-| 0.0.1                    | 2.7.9               | master                    |
+| 2.1.18                   | 2.1.18.RELEASE      | spring-boot-2.1.x         |
+| 2.1.1                    | 2.1.1.RELEASE       | spring-boot-2.1.x         |
 
 ## Installation
 
