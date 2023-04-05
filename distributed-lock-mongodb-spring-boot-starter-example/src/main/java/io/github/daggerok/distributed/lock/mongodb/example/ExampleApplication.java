@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,7 +81,7 @@ class ExampleResource {
     @GetMapping("/get-state/{username}")
     ResponseEntity<Optional<LastMessage>> getLastMessage(@PathVariable String username) {
         Optional<LastMessage> maybeLastMessage = mongoTemplate.query(LastMessage.class)
-                .matching(Criteria.where("fromUser").is(username))
+                .matching(Query.query(Criteria.where("fromUser").is(username)))
                 .one();
         return toResponseEntity(maybeLastMessage);
     }
@@ -89,13 +90,13 @@ class ExampleResource {
     ResponseEntity<Optional<List<LastMessage>>> tryLockAndUpdate(@PathVariable String username, @PathVariable String content) {
         Optional<List<LastMessage>> maybeLastMessages = distributedLock.acquireAndGet(Lock.of(username), () -> {
             mongoTemplate.update(LastMessage.class)
-                    .matching(Criteria.where("fromUser").is(username))
+                    .matching(Query.query(Criteria.where("fromUser").is(username)))
                     .apply(Update.update("content", content).set("lastModifiedAt", Instant.now()))
                     .withOptions(FindAndModifyOptions.options().upsert(true))
                     .findAndModify()
                     .ifPresent(prev -> log.debug("Updating {}", prev));
             return mongoTemplate.query(LastMessage.class)
-                    .matching(Criteria.where("fromUser").is(username))
+                    .matching(Query.query(Criteria.where("fromUser").is(username)))
                     .all();
         });
         return toResponseEntity(maybeLastMessages);

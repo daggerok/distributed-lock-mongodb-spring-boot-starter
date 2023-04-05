@@ -11,11 +11,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ExecutableFindOperation;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 @Log4j2
@@ -152,7 +151,7 @@ public class DistributedLock {
     public Optional<Lock> release(String lockId) {
         String id = Optional.ofNullable(lockId).orElseThrow(LockException::lockIdIsRequired);
         Optional<Lock> maybePrevious = mongoTemplate.update(Lock.class)
-                .matching(Criteria.where("id").is(id))
+                .matching(Query.query(Criteria.where("id").is(id)))
                 .apply(Update.update("state", Lock.State.NONE).set("lastModifiedAt", Instant.now()))
                 .findAndModify();
         Optional<Lock> maybeReleased = queryCurrent(maybePrevious);
@@ -171,6 +170,7 @@ public class DistributedLock {
         Objects.requireNonNull(previous, "Optional may not be null");
         return previous.map(Lock::getId)
                 .map(Criteria.where("id")::is)
+                .map(Query::query)
                 .map(mongoTemplate.query(Lock.class)::matching)
                 .flatMap(ExecutableFindOperation.TerminatingFind::one);
     }
@@ -200,7 +200,7 @@ public class DistributedLock {
      * @return number of locks create for given {@link Lock} config
      */
     long countLocks(Lock lock) {
-        long count = mongoTemplate.query(Lock.class).matching(lockedBy.apply(lock)).count();
+        long count = mongoTemplate.query(Lock.class).matching(Query.query(lockedBy.apply(lock))).count();
         log.debug("Found {} locks for '{}' lockedBy criteria", count, lock.lockedBy);
         return count;
     }
@@ -213,10 +213,6 @@ public class DistributedLock {
      * @return {@link Optional} with newly created and acquired {@link Lock}
      */
     Optional<Lock> createNewLock(Lock lock, Duration lockPeriod) {
-        Index indexToEnsure = new Index("lockedBy", Sort.Direction.ASC).named("Lock_lockedBy").unique();
-        String index = mongoTemplate.indexOps(Lock.class).ensureIndex(indexToEnsure);
-        log.debug("Ensured index {} exists", index);
-
         Instant now = Instant.now();
         Lock toAcquire = lock.withLockPeriod(lockPeriod).withState(Lock.State.LOCKED).withLockedAt(now).withLastModifiedAt(now);
         Lock acquired = mongoTemplate.insert(toAcquire);
@@ -239,7 +235,7 @@ public class DistributedLock {
         Criteria lockedFindCriteria = new Criteria().andOperator(lockedBy.apply(lock), lockedAt);
         Criteria findCriteria = new Criteria().orOperator(noneFindCriteria, lockedFindCriteria);
         Update modifyUpdate = Update.update("state", Lock.State.LOCKED).set("lastModifiedAt", Instant.now());
-        return mongoTemplate.update(Lock.class).matching(findCriteria).apply(modifyUpdate).findAndModify();
+        return mongoTemplate.update(Lock.class).matching(Query.query(findCriteria)).apply(modifyUpdate).findAndModify();
     }
 
     /**
