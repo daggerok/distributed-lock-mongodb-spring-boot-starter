@@ -25,25 +25,25 @@ class LockTests {
         assertThatThrownBy(() -> Lock.of(null, null))
                 // then
                 .isInstanceOf(LockException.class)
-                .hasMessage("lock identity is required");
+                .hasMessage("lock by identifier is required");
 
         // and when identifiers serializable array contains only nulls
         assertThatThrownBy(() -> Lock.of(null, null, null))
                 // then
                 .isInstanceOf(LockException.class)
-                .hasMessage("lock identity is required");
+                .hasMessage("lock by identifier is required");
 
         // and when only lock period was provided
         assertThatThrownBy(() -> Lock.of(Duration.ofSeconds(1)))
                 // then
                 .isInstanceOf(LockException.class)
-                .hasMessage("lock identity is required");
+                .hasMessage("lock by identifier is required");
 
         // and when no argument was provided
         assertThatThrownBy(Lock::of)
                 // then
                 .isInstanceOf(LockException.class)
-                .hasMessage("lock identity is required");
+                .hasMessage("lock by identifier is required");
     }
 
     @Test

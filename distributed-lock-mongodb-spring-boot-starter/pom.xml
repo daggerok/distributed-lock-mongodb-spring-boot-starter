@@ -29,11 +29,5 @@
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
-        <!--suppress VulnerableLibrariesLocal: checkmarx vulnerability report. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>
