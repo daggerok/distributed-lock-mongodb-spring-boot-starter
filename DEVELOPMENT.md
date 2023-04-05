@@ -18,9 +18,13 @@ To support different Spring Boot versions it's important to keep track next summ
   * use `strategy.matrix.java: [17, 20]` for java 17 branch
   * use `strategy.matrix.java: [8, 11, 17, 20]` for java 8 branch
 * in `io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties` class
-  don't use `@ConstructorBinding` annotation starting from Spring Boot version 2.7.10
-* starting from Spring Boot version 2.7.10 instead of using `src/main/resources/META-INF/spring.factories` file
+  don't use `@ConstructorBinding` annotation starting from Spring Boot version 2.7.x
+* starting from Spring Boot version 2.7.x instead of using `src/main/resources/META-INF/spring.factories` file
   use `src/main/resource/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` file
+* starting from Spring Boot version 2.7.x instead of using `@AutoConfigureAfter(MongoDataAutoConfiguration.class)`
+  use `@AutoConfiguration(after = MongoDataAutoConfiguration.class)` annotation
+* starting from Spring Boot version 2.7.x instead of using `org.springframework.boot.test.web.server.LocalServerPort`
+  use `org.springframework.boot.web.server.LocalServerPort` annotation import
 
 ## Build and run tests
 

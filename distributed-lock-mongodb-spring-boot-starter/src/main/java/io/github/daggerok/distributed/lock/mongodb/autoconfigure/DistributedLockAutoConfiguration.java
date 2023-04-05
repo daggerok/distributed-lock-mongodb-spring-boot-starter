@@ -2,7 +2,7 @@ package io.github.daggerok.distributed.lock.mongodb.autoconfigure;
 
 import io.github.daggerok.distributed.lock.mongodb.DistributedLock;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,8 +20,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @Log4j2
 @Configuration
 @ConditionalOnClass(DistributedLock.class)
+@AutoConfigureAfter(MongoDataAutoConfiguration.class)
 @ComponentScan(basePackageClasses = DistributedLock.class)
-@AutoConfiguration(after = MongoDataAutoConfiguration.class)
 @EnableConfigurationProperties(DistributedLockProperties.class)
 public class DistributedLockAutoConfiguration {
 
