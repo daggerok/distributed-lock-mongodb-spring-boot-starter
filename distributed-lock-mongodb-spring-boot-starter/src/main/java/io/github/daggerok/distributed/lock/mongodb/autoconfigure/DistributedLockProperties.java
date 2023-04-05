@@ -1,22 +1,16 @@
 package io.github.daggerok.distributed.lock.mongodb.autoconfigure;
 
 import java.time.Duration;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @ConfigurationProperties("io.github.daggerok.distributed.lock.mongodb")
 public class DistributedLockProperties {
-
-    Boolean enabled;
-    Duration lockPeriod;
-
-    @ConstructorBinding
-    public DistributedLockProperties(@DefaultValue("true") Boolean enabled,
-                                     @DefaultValue("15000ms") Duration lockPeriod) {
-        this.enabled = enabled;
-        this.lockPeriod = lockPeriod;
-    }
+    Boolean enabled = true;
+    Duration lockPeriod = Duration.ofSeconds(15);
 }

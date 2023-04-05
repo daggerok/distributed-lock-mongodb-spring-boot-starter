@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
@@ -32,6 +34,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 @AllArgsConstructor(onConstructor_ = @Autowired)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@ContextConfiguration(initializers = DistributedLockIntegrationTests.DistributedLockIntegrationTestsApplicationContextInitializer.class)
 class DistributedLockIntegrationTests {
 
     @Container
@@ -40,15 +43,20 @@ class DistributedLockIntegrationTests {
             .waitingFor(new HostPortWaitStrategy())
             .withAccessToHost(true);
 
+    static class DistributedLockIntegrationTestsApplicationContextInitializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues
+                    .of(String.format("spring.data.mongodb.uri=%s", mongoDBContainer.getReplicaSetUrl()))
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
+    }
+
     MongoTemplate mongoTemplate;
     DistributedLock distributedLock;
     DistributedLockProperties props;
-
-    @DynamicPropertySource
-    static void setupSpringBootProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        log.info("Setting up spring.data.mongodb={}", mongoDBContainer::getReplicaSetUrl);
-        dynamicPropertyRegistry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
 
     @BeforeEach
     void before_each() {

@@ -1,6 +1,7 @@
 package io.github.daggerok.distributed.lock.mongodb.example;
 
 import io.github.daggerok.distributed.lock.mongodb.Lock;
+import io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockAutoConfiguration;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -16,14 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
@@ -33,8 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
 @Testcontainers
+@Import(DistributedLockAutoConfiguration.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(initializers = ExampleApplicationTests.ExampleApplicationTestsApplicationContextInitializer.class)
 class ExampleApplicationTests {
 
     @Container
@@ -43,10 +49,15 @@ class ExampleApplicationTests {
             .waitingFor(new HostPortWaitStrategy())
             .withAccessToHost(true);
 
-    @DynamicPropertySource
-    static void setupSpringBootProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        log.info("Setting up spring.data.mongodb={}", mongoDBContainer::getReplicaSetUrl);
-        dynamicPropertyRegistry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    static class ExampleApplicationTestsApplicationContextInitializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertyValues
+                    .of(String.format("spring.data.mongodb.uri=%s", mongoDBContainer.getReplicaSetUrl()))
+                    .applyTo(configurableApplicationContext.getEnvironment());
+        }
     }
 
     @LocalServerPort
