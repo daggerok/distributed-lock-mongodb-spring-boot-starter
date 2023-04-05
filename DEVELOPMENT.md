@@ -1,5 +1,31 @@
 # Development
 
+## CVS
+
+To support different Spring Boot versions it's important to keep track next summary:
+* in `io.github.daggerok.distributed.lock.mongodb.example.ExampleApplicationTests` class
+  * use `var` for java 17 branch
+    ```java
+    var someVariable = // ...
+    ```
+  * use lombok `val` for java 8 branch:
+    ```java
+    import lombok.val;
+    // skipped...
+    val someVariable = // ...
+    ```
+* in `.github/workflows/*.yaml` files:
+  * use `strategy.matrix.java: [17, 20]` for java 17 branch
+  * use `strategy.matrix.java: [8, 11, 17, 20]` for java 8 branch
+* in `io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties` class
+  don't use `@ConstructorBinding` annotation starting from Spring Boot version 3.0.x
+* starting from Spring Boot version 2.7.x instead of using `src/main/resources/META-INF/spring.factories` file
+  use `src/main/resource/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` file
+* starting from Spring Boot version 2.7.x instead of using `@AutoConfigureAfter(MongoDataAutoConfiguration.class)`
+  use `@AutoConfiguration(after = MongoDataAutoConfiguration.class)` annotation
+* starting from Spring Boot version 2.7.x instead of using `org.springframework.boot.test.web.server.LocalServerPort`
+  use `org.springframework.boot.web.server.LocalServerPort` annotation import
+
 ## Build and run tests
 
 ```bash
@@ -30,27 +56,3 @@ http -I post :8080/post-state/daggerok/but-now-this-should-work
 ./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
 ./mvnw -f docker                                                    docker:stop
 ```
-
-<!--
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The JVM level was changed from '1.8' to '17', review the [JDK Version Range](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions#jdk-version-range) on the wiki for more details.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.5/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.5/maven-plugin/reference/html/#build-image)
-* [Testcontainers MongoDB Module Reference Guide](https://www.testcontainers.org/modules/databases/mongodb/)
-* [Testcontainers](https://www.testcontainers.org/)
-* [Thymeleaf](https://docs.spring.io/spring-boot/docs/3.0.5/reference/htmlsingle/#web.servlet.spring-mvc.template-engines)
-* [Spring Data MongoDB](https://docs.spring.io/spring-boot/docs/3.0.5/reference/htmlsingle/#data.nosql.mongodb)
-* [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
-* [Accessing Data with MongoDB](https://spring.io/guides/gs/accessing-data-mongodb/)
-
--->

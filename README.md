@@ -5,6 +5,21 @@ maven module to help run example showcase application uses mongo docker containe
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.daggerok/distributed-lock-mongodb-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.daggerok%22%20AND%20a:%22distributed-lock-mongodb-spring-boot-starter%22)
 
+## Versions convention
+
+We support next version convention:
+
+| Distributed Lock version | Spring Boot version | GitHub branch             |
+|--------------------------|---------------------|---------------------------|
+| 2.7.10                   | 2.7.10              | spring-boot-2.7.x         |
+| 2.6.14                   | 2.6.14              | spring-boot-2.6.x         |
+| 2.5.14                   | 2.5.14              | spring-boot-2.5.x         |
+| 2.4.13                   | 2.4.13              | spring-boot-2.4.x         |
+| 2.3.12                   | 2.3.12.RELEASE      | spring-boot-2.3.x         |
+| 2.2.13                   | 2.2.13.RELEASE      | spring-boot-2.2.x         |
+| 2.1.18                   | 2.1.18.RELEASE      | spring-boot-2.1.x         |
+| 2.1.1                    | 2.1.1.RELEASE       | spring-boot-2.1.x         |
+
 ## Installation
 
 ```xml
@@ -89,8 +104,8 @@ Acquire lock (try lock)
 
 ```java
 Optional<Lock> maybeLock = distributedLock.acquire(Lock.of(identifier));
-        if (maybeLock.isPresent()) log.debug("Lock was acquired.");
-        else log.warn("Lock can't be acquired...");
+if (maybeLock.isPresent()) log.debug("Lock was acquired.");
+else log.warn("Lock can't be acquired...");
 ```
 
 ### release(String lockId)
