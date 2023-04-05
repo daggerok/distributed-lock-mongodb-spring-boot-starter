@@ -1,5 +1,6 @@
 package io.github.daggerok.distributed.lock.mongodb.example;
 
+import io.github.daggerok.distributed.lock.mongodb.AbstractTestcontainersTests;
 import io.github.daggerok.distributed.lock.mongodb.Lock;
 import java.net.URI;
 import java.util.List;
@@ -9,11 +10,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -21,32 +19,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
-@Testcontainers
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ExampleApplicationTests {
-
-    @Container
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.4.2")
-            .withExposedPorts(MongoProperties.DEFAULT_PORT)
-            .waitingFor(new HostPortWaitStrategy())
-            .withAccessToHost(true);
-
-    @DynamicPropertySource
-    static void setupSpringBootProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        log.info("Setting up spring.data.mongodb={}", mongoDBContainer::getReplicaSetUrl);
-        dynamicPropertyRegistry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-    }
+class ExampleApplicationTests extends AbstractTestcontainersTests {
 
     @LocalServerPort
     Integer port;

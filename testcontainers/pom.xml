@@ -10,30 +10,21 @@
     </parent>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
-    <description>Spring boot distributed-lock-mongodb auto-configuration module</description>
+    <artifactId>distributed-lock-mongodb-testcontainers</artifactId>
+    <description>Development testcontainers maven module</description>
     <dependencies>
-        <dependency>
-            <groupId>io.github.daggerok</groupId>
-            <artifactId>distributed-lock-mongodb</artifactId>
-        </dependency>
-        <!---->
+        <!--suppress VulnerableLibrariesLocal: checkmarx vulnerability report. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
-        <!---->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
         </dependency>
-        <!---->
         <dependency>
-            <groupId>io.github.daggerok</groupId>
-            <artifactId>distributed-lock-mongodb-testcontainers</artifactId>
-            <scope>test</scope>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
         </dependency>
     </dependencies>
 </project>
