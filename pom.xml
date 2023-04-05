@@ -214,15 +214,6 @@
             </properties>
         </profile>
         <profile>
-            <id>java17-requires-jackarta-servlet</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <properties>
-                <jakarta-servlet.version>5.0.0</jakarta-servlet.version>
-            </properties>
-        </profile>
-        <profile>
             <id>read gpg.passphrase system property</id>
             <!--
                 This profile will pick `gpg.passphrase` java system property to configure maven-gpg-plugin passphrase implicitly
