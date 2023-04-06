@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Log4j2
 @SpringBootTest
 @AllArgsConstructor(onConstructor_ = @Autowired)
+@DisplayName("DistributedLock integration tests")
 class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
 
     MongoTemplate mongoTemplate;
