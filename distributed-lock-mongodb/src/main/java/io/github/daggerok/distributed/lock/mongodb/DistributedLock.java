@@ -81,8 +81,8 @@ public class DistributedLock {
      *     return maybeLock.isPresent() ? "Lock was acquired." : "Lock can't be acquired.";
      * </pre>
      *
-     * @param identifiers - {@link Lock#lockedBy} identifiers to be acquired
      * @param lockPeriod  - how long lock is going to be acquired
+     * @param identifiers - {@link Lock#lockedBy} identifiers to be acquired
      * @return {@link Optional} of type {@link Lock} which is going to be containing instance of persisted {@link Lock}
      * in case if lock was acquired or empty otherwise
      * @see DistributedLock#tryLock(Lock)
@@ -91,6 +91,30 @@ public class DistributedLock {
     @SafeVarargs
     public final <T extends Serializable> Optional<Lock> acquire(Duration lockPeriod, T... identifiers) {
         return acquire(Lock.of(lockPeriod, identifiers));
+    }
+
+    /**
+     * Try to acquire a lock according to given config.
+     * <p>
+     * Usage:
+     * <pre>
+     *     var maybeLock = distributedLock.acquire(Lock.of(identifier));
+     *
+     *     return maybeLock.isPresent() ? "Lock was acquired." : "Lock can't be acquired.";
+     * </pre>
+     *
+     * @param description - lock description, comment or note, can be used as information to additionally identify who
+     *                   was acquired certain lock
+     * @param lockPeriod  - how long lock is going to be acquired
+     * @param identifiers - {@link Lock#lockedBy} identifiers to be acquired
+     * @return {@link Optional} of type {@link Lock} which is going to be containing instance of persisted {@link Lock}
+     * in case if lock was acquired or empty otherwise
+     * @see DistributedLock#tryLock(Lock)
+     * @see DistributedLock#acquire(Serializable[])
+     */
+    @SafeVarargs
+    public final <T extends Serializable> Optional<Lock> acquire(String description, Duration lockPeriod, T... identifiers) {
+        return acquire(Lock.of(description, lockPeriod, identifiers));
     }
 
     /**
