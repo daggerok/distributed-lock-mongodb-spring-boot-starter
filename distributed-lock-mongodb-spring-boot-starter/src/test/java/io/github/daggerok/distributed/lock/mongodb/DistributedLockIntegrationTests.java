@@ -2,6 +2,7 @@ package io.github.daggerok.distributed.lock.mongodb;
 
 import io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties;
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,7 +58,13 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .hasMessage("lock by identifier is required");
 
         // when execution with 3 null args (lockPeriod and nullable identifiers)
-        assertThatThrownBy(() -> distributedLock.acquire(null, null, null))
+        assertThatThrownBy(() -> distributedLock.acquire("description", null, null, null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
+        // when execution with 4 null args (description, lockPeriod and nullable identifiers)
+        assertThatThrownBy(() -> distributedLock.acquire(/* description */ (String) null, null, null, null))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
@@ -76,6 +83,8 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
 
         // then
         assertThat(maybeLock).isPresent();
+
+        // and
         maybeLock.ifPresent(lock -> {
             assertThat(lock.version).isNotNull();
             assertThat(lock.lockedAt).isNotNull();
@@ -85,18 +94,23 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
     }
 
     @Test
-    void should_acquire_if_identifiers_contains_some_nullables() {
+    void should_acquire_even_if_identifiers_contains_also_some_nullable_values() {
         // when
-        Optional<Lock> maybeLock = distributedLock.acquire(null, null, "should", null, "acquire", null, "if", null, "identifiers", null, "contains", null, "some", null, "nullables", null);
+        Optional<Lock> maybeLock = distributedLock.acquire(
+                (Duration) null, null, "should", null, "acquire", null, "even", null, "if", null,
+                "identifiers", null, "contains", null, "also", null, "some", null, "nullable", null, "values", null
+        );
 
         // then
         assertThat(maybeLock).isPresent();
+
+        // and
         maybeLock.ifPresent(lock -> {
             assertThat(lock.version).isNotNull();
             assertThat(lock.lockedAt).isNotNull();
             assertThat(lock.lastModifiedAt).isNotNull();
             assertThat(lock.state).isEqualTo(Lock.State.LOCKED);
-            assertThat(lock.lockedBy).isEqualTo("should-acquire-if-identifiers-contains-some-nullables");
+            assertThat(lock.lockedBy).isEqualTo("should-acquire-even-if-identifiers-contains-also-some-nullable-values");
         });
     }
 
