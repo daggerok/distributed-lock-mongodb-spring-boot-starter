@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
 @Testcontainers
+@DisplayName("ExampleApplication tests")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ExampleApplicationTests {
