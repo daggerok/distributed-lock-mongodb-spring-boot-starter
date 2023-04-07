@@ -25,6 +25,14 @@ To support different Spring Boot versions it's important to keep track next summ
   use `@AutoConfiguration(after = MongoDataAutoConfiguration.class)` annotation
 * starting from Spring Boot version 2.7.x instead of using `org.springframework.boot.test.web.server.LocalServerPort`
   use `org.springframework.boot.web.server.LocalServerPort` annotation import
+* to release patch for unsupported old spring-boot, use qualifiers, like so:
+  ```bash
+  # update version according to spring-boot
+  .bin/update-version.sh 2.2.13
+  # release using qualifier as patch number
+  QUALIFIER=2 GPG_PASSPHRASE=... bash .bin/central-release.sh
+  # as result, version 2.2.13-2 will be released
+  ```
 
 ## Build and run tests
 
