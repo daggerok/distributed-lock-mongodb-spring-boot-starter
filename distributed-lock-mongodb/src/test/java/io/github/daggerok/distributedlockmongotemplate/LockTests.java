@@ -2,6 +2,8 @@ package io.github.daggerok.distributedlockmongotemplate;
 
 import io.github.daggerok.distributed.lock.mongodb.Lock;
 import io.github.daggerok.distributed.lock.mongodb.LockException;
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,14 +23,32 @@ class LockTests {
 
     @Test
     void should_not_create_lock_config_because_lock_identity_is_required() {
-        // when identifiers serializable array is null
-        assertThatThrownBy(() -> Lock.of(null, null))
+        // when description, lock period and serializable array has nulls
+        assertThatThrownBy(() -> Lock.of((String) /* description: */ null, /* lockPeriod: */ null, /* identifiers: */ null, null))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
 
-        // and when identifiers serializable array contains only nulls
-        assertThatThrownBy(() -> Lock.of(null, null, null))
+        // and when all arguments are nulls
+        assertThatThrownBy(() -> Lock.of(/* description: */ null, /* lockPeriod: */ null, /* identifiers: */ (Serializable[]) null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
+        // and when lockPeriod with identifiers serializable array are nulls
+        assertThatThrownBy(() -> Lock.of(/* lockPeriod: */ null, /* identifiers: */ (Serializable[]) null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
+        // and when identifiers serializable array is null
+        assertThatThrownBy(() -> Lock.of(/* identifiers: */ (Serializable[]) null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
+        // and when description with lock period was provided
+        assertThatThrownBy(() -> Lock.of("description", Duration.ofSeconds(1)))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
@@ -80,5 +100,16 @@ class LockTests {
         // then
         assertThat(lockConfig.getLockPeriod()).isNull();
         assertThat(lockConfig.getLockedBy()).containsSequence("value", "-", "123", "-", "456789");
+    }
+
+    @Test
+    void should_create_lock_config_with_description() {
+        // when
+        Lock lockConfig = Lock.of("a description", /* lockPeriod: */ null, "1", 23L, new BigDecimal("4.56"), new BigInteger("7890"));
+        log.info("lockConfig: {}", lockConfig);
+
+        // then
+        assertThat(lockConfig.getDescription()).isEqualTo("a description");
+        assertThat(lockConfig.getLockedBy()).isEqualTo("1-23-4.56-7890");
     }
 }
