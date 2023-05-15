@@ -295,5 +295,5 @@ To publish your artifacts into maven central repository you have to prepare your
     version numbers sequence, use qualifier, but before revert to previous SNAPSHOT with next two commands:
     ```bash
     bash .bin/update-version.sh 3.0.6-SNAPSHOT
-    QUALIFIER=3 GPG_PASSPHRASE=YourGpgPassword bash .bin/central-release.sh -DskipTests
+    QUALIFIER=4 GPG_PASSPHRASE=YourGpgPassword bash .bin/central-release.sh -DskipTests
     ```
