@@ -4,7 +4,7 @@
 # Update maven project version in all pom.xml files up to specified snapshot.
 #
 # Usage:
-#         bash .bin/update-version.sh 3.0.5-SNAPSHOT
+#         bash .bin/update-version.sh 3.0.6-SNAPSHOT
 ###
 
 set -o pipefail

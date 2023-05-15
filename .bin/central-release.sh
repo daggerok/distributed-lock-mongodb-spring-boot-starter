@@ -7,9 +7,9 @@
 #         bash .bin/central-release.sh -Dgpg.passphrase=...
 #         GPG_PASSPHRASE=... bash .bin/central-release.sh
 #         GPG_PASSPHRASE=... bash .bin/central-release.sh -DskipTests
-#         QUALIFIER=SR1 bash .bin/central-release.sh -Dgpg.passphrase=...
-#         QUALIFIER=SR1 GPG_PASSPHRASE=... bash .bin/central-release.sh
-#         QUALIFIER=SR1 GPG_PASSPHRASE=... bash .bin/central-release.sh -DskipTests
+#         QUALIFIER=3 bash .bin/central-release.sh -Dgpg.passphrase=...
+#         QUALIFIER=3 GPG_PASSPHRASE=... bash .bin/central-release.sh
+#         QUALIFIER=3 GPG_PASSPHRASE=... bash .bin/central-release.sh -DskipTests
 #
 # Require:
 #         brew reinstall gnupg@2.2
