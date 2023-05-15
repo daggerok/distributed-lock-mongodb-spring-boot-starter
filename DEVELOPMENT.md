@@ -3,6 +3,8 @@
 ## CVS
 
 To support different Spring Boot versions it's important to keep track next summary:
+* starting from spring-boot 2.3.x you should manually ensure new index gets created.
+  see: `io.github.daggerok.distributed.lock.mongodb.DistributedLock.createNewLock` method
 * in `io.github.daggerok.distributed.lock.mongodb.example.ExampleApplicationTests` class
   * use `var` for java 17 branch
     ```java
@@ -30,7 +32,7 @@ To support different Spring Boot versions it's important to keep track next summ
   # update version according to spring-boot
   .bin/update-version.sh 2.2.13
   # release using qualifier as patch number
-  QUALIFIER=2 GPG_PASSPHRASE=... bash .bin/central-release.sh
+  QUALIFIER=4 GPG_PASSPHRASE=... bash .bin/central-release.sh
   # as result, version 2.2.13-2 will be released
   ```
 

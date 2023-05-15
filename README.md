@@ -11,8 +11,7 @@ We support next version convention:
 
 | Distributed Lock version | Spring Boot version | GitHub branch     |
 |--------------------------|---------------------|-------------------|
-| 3.0.5-2                  | 3.0.5               | master            |
-| 3.0.5                    | 3.0.5               | master            |
+| 3.0.6                    | 3.0.6               | master            |
 | 2.7.11                   | 2.7.11              | spring-boot-2.7.x |
 | 2.6.14-4                 | 2.6.14              | spring-boot-2.6.x |
 | 2.5.14-4                 | 2.5.14              | spring-boot-2.5.x |

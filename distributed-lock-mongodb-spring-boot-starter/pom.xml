@@ -13,6 +13,7 @@
     <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
     <description>Spring boot distributed-lock-mongodb auto-configuration module</description>
     <dependencies>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>io.github.daggerok</groupId>
             <artifactId>distributed-lock-mongodb</artifactId>
@@ -21,6 +22,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
         <!---->
         <dependency>
