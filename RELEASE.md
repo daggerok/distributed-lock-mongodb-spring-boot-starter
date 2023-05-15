@@ -289,5 +289,5 @@ To publish your artifacts into maven central repository you have to prepare your
     ```
   * next command to build and upload release version:
     ```bash
-    GPG_PASSPHRASE=YourGpgPassword bash .bin/central-release.sh -DskipTests
+    QUALIFIER=3 GPG_PASSPHRASE=YourGpgPassword bash .bin/central-release.sh -DskipTests
     ```
