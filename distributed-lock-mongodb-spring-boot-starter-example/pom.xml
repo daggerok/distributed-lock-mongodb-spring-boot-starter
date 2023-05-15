@@ -28,6 +28,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>io.github.daggerok</groupId>
             <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
