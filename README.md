@@ -15,8 +15,7 @@ We support next version convention:
 | 3.0.5                    | 3.0.5               | master            |
 | 2.7.10-2                 | 2.7.10              | spring-boot-2.7.x |
 | 2.7.10                   | 2.7.10              | spring-boot-2.7.x |
-| 2.6.14-2                 | 2.6.14              | spring-boot-2.6.x |
-| 2.6.14                   | 2.6.14              | spring-boot-2.6.x |
+| 2.6.14-4                 | 2.6.14              | spring-boot-2.6.x |
 | 2.5.14-4                 | 2.5.14              | spring-boot-2.5.x |
 | 2.4.13-4                 | 2.4.13              | spring-boot-2.4.x |
 | 2.3.12-4                 | 2.3.12.RELEASE      | spring-boot-2.3.x |
