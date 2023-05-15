@@ -25,8 +25,7 @@ We support next version convention:
 | 2.3.12                   | 2.3.12.RELEASE      | spring-boot-2.3.x |
 | 2.2.13-2                 | 2.2.13.RELEASE      | spring-boot-2.2.x |
 | 2.2.13                   | 2.2.13.RELEASE      | spring-boot-2.2.x |
-| 2.1.18-2                 | 2.1.18.RELEASE      | spring-boot-2.1.x |
-| 2.1.18                   | 2.1.18.RELEASE      | spring-boot-2.1.x |
+| 2.1.18-4                 | 2.1.18.RELEASE      | spring-boot-2.1.x |
 | 2.1.1                    | 2.1.1.RELEASE       | spring-boot-2.1.x |
 
 ## Installation
