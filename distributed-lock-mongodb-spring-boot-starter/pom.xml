@@ -17,10 +17,15 @@
             <groupId>io.github.daggerok</groupId>
             <artifactId>distributed-lock-mongodb</artifactId>
         </dependency>
-        <!---->
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
         <!---->
         <dependency>
