@@ -23,8 +23,8 @@ public class DistributedLock {
 
     private static final Function<Lock, Criteria> lockedBy = lock -> Criteria.where("lockedBy").is(lock.lockedBy);
 
-    private final MongoTemplate mongoTemplate;
     private final Duration defaultLockPeriod;
+    private final MongoTemplate mongoTemplate;
 
     /**
      * Try to acquire a lock according to given config.
@@ -45,9 +45,7 @@ public class DistributedLock {
     public Optional<Lock> acquire(Lock lockConfig) {
         Lock lock = Optional.ofNullable(lockConfig).orElseThrow(LockException::lockIsRequired);
         Optional<Lock> maybePrevious = tryLock(lock);
-        Optional<Lock> maybeAcquired = queryCurrent(maybePrevious);
-        maybeAcquired.ifPresent(it -> log.debug("Lock {} acquired", it));
-        return maybeAcquired;
+        return queryCurrent(maybePrevious);
     }
 
     /**
@@ -104,7 +102,7 @@ public class DistributedLock {
      * </pre>
      *
      * @param description - lock description, comment or note, can be used as information to additionally identify who
-     *                   was acquired certain lock
+     *                    was acquired certain lock
      * @param lockPeriod  - how long lock is going to be acquired
      * @param identifiers - {@link Lock#lockedBy} identifiers to be acquired
      * @return {@link Optional} of type {@link Lock} which is going to be containing instance of persisted {@link Lock}
@@ -136,7 +134,7 @@ public class DistributedLock {
      */
     public <T> Optional<T> acquireAndGet(Lock lockConfig, CheckedFunction0<T> execution) {
         CheckedFunction0<T> anExecution = Optional.ofNullable(execution).orElseThrow(LockException::executionIsRequired);
-        return acquire(lockConfig).flatMap(it -> executeAndRelease(it.id, anExecution));
+        return acquire(lockConfig).flatMap(acquired -> executeAndRelease(acquired, anExecution));
     }
 
     /**
@@ -156,7 +154,7 @@ public class DistributedLock {
      */
     public <T> Optional<Boolean> acquireAndRun(Lock lockConfig, CheckedRunnable runnable) {
         CheckedRunnable aRunnable = Optional.ofNullable(runnable).orElseThrow(LockException::runnableIsRequired);
-        return acquire(lockConfig).flatMap(it -> runAndRelease(it.id, aRunnable));
+        return acquire(lockConfig).flatMap(acquired -> runAndRelease(acquired, aRunnable));
     }
 
     /**
@@ -179,7 +177,7 @@ public class DistributedLock {
                 .apply(Update.update("state", Lock.State.NONE).set("lastModifiedAt", Instant.now()))
                 .findAndModify();
         Optional<Lock> maybeReleased = queryCurrent(maybePrevious);
-        maybeReleased.ifPresent(it -> log.debug("Lock {} released", it));
+        maybeReleased.ifPresent(it -> log.debug("Lock released: {}", it));
         return maybeReleased;
     }
 
@@ -212,66 +210,99 @@ public class DistributedLock {
      * @see DistributedLock#acquire(Duration, Serializable[])
      */
     Optional<Lock> tryLock(Lock lock) {
-        Duration lockPeriod = Optional.ofNullable(lock.lockPeriod).orElse(this.defaultLockPeriod);
-        // if no locks available: create it at first time, otherwise try to acquire existing lock
-        return countLocks(lock) < 1 ? createNewLock(lock, lockPeriod) : acquireExistingLock(lock, lockPeriod);
+        Optional<Lock> maybeExistingLock = findExistingLock(lock);
+        return maybeExistingLock.isPresent()
+                // if lock is available try to acquire it
+                ? maybeExistingLock.flatMap(this::acquireExistingLock)
+                // otherwise try to create new lock at first time
+                : createNewLock(lock);
     }
 
     /**
-     * Helper method to count existing locks for given config.
+     * Helper method to find first existing lock (released or expired) for given config.
+     *
+     * @param config - {@link Lock} config
+     * @return {@link Optional} of type {@link Lock} for given {@link Lock} config
+     */
+    Optional<Lock> findExistingLock(Lock config) {
+        Optional<Lock> maybeLock = mongoTemplate.query(Lock.class).matching(Query.query(lockedBy.apply(config))).one();
+
+        maybeLock.ifPresent(lock -> {
+            boolean isReleased = lock.state == Lock.State.NONE;
+            boolean isExpired = lock.state == Lock.State.LOCKED
+                    && Objects.nonNull(lock.lockedAt) && Objects.nonNull(lock.getLockPeriod())
+                    && Instant.now().isAfter(lock.lastModifiedAt.plusNanos(lock.getLockPeriod().toNanos()));
+
+            if (isReleased) log.debug("Found released lock: {}", lock);
+            if (isExpired) log.debug("Found expired lock: {}", lock);
+            if (!isReleased && !isExpired) log.debug("Found non expired lock: {}", lock);
+        });
+        if (!maybeLock.isPresent()) log.debug("Lock not found by: {}", config.lockedBy);
+
+        return maybeLock;
+    }
+
+    /**
+     * Helper method to acquire existing lock.
      *
      * @param lock - {@link Lock} config
-     * @return number of locks create for given {@link Lock} config
-     */
-    long countLocks(Lock lock) {
-        long count = mongoTemplate.query(Lock.class).matching(Query.query(lockedBy.apply(lock))).count();
-        log.debug("Found {} locks for '{}' lockedBy criteria", count, lock.lockedBy);
-        return count;
-    }
-
-    /**
-     * Helper method to acquire existing lock.
-     *
-     * @param lock       - {@link Lock} config
-     * @param lockPeriod - {@link Duration} lock period
      * @return {@link Optional} with newly created and acquired {@link Lock}
      */
-    Optional<Lock> createNewLock(Lock lock, Duration lockPeriod) {
+    Optional<Lock> createNewLock(Lock lock) {
+        Duration lockPeriod = Optional.ofNullable(lock.getLockPeriod()).orElse(defaultLockPeriod);
+        log.debug("Trying to create new lock for {} period and {} config", lockPeriod, lock);
         Instant now = Instant.now();
-        Lock toAcquire = lock.withLockPeriod(lockPeriod).withState(Lock.State.LOCKED).withLockedAt(now).withLastModifiedAt(now);
-        Lock acquired = mongoTemplate.insert(toAcquire);
-        log.debug("Acquired: {}", acquired);
-
-        return Optional.of(acquired);
+        Lock toAcquire = lock.withState(Lock.State.LOCKED)
+                .withLockedAt(now)
+                .withLastModifiedAt(now)
+                .withLockPeriodDuration(lockPeriod.toString());
+        return Try.of(() -> mongoTemplate.insert(toAcquire))
+                .onSuccess(acquired -> log.debug("New lock created and acquired: {}", acquired))
+                .onFailure(throwable -> log.error("New lock creation error: {}", throwable::getMessage))
+                .toJavaOptional();
     }
 
     /**
      * Helper method to acquire existing lock.
      *
-     * @param lock       - {@link Lock} config
-     * @param lockPeriod - {@link Duration} lock period
+     * @param lock - {@link Lock} config
      * @return {@link Optional} of type {@link Lock} if that can be acquired
      */
-    Optional<Lock> acquireExistingLock(Lock lock, Duration lockPeriod) {
+    Optional<Lock> acquireExistingLock(Lock lock) {
+        Duration lockPeriod = Optional.ofNullable(lock.getLockPeriod()).orElse(defaultLockPeriod);
+        log.debug("Trying to acquiring existing lock for {} period and {} config", lockPeriod, lock);
+        Criteria id = Criteria.where("id").is(lock.id);
+        Criteria version = Criteria.where("version").is(lock.version);
+        Criteria lockedBy = DistributedLock.lockedBy.apply(lock);
         Criteria stateNone = Criteria.where("state").is(Lock.State.NONE);
-        Criteria lockedAt = Criteria.where("lockedAt").lt(Instant.now().minusNanos(lockPeriod.toNanos()));
-        Criteria noneFindCriteria = new Criteria().andOperator(lockedBy.apply(lock), stateNone);
-        Criteria lockedFindCriteria = new Criteria().andOperator(lockedBy.apply(lock), lockedAt);
-        Criteria findCriteria = new Criteria().orOperator(noneFindCriteria, lockedFindCriteria);
-        Update modifyUpdate = Update.update("state", Lock.State.LOCKED).set("lastModifiedAt", Instant.now());
-        return mongoTemplate.update(Lock.class).matching(Query.query(findCriteria)).apply(modifyUpdate).findAndModify();
+        Criteria released = new Criteria().andOperator(id, lockedBy, version, stateNone);
+        Criteria stateLocked = Criteria.where("state").is(Lock.State.LOCKED);
+        Instant expiredFrom = Instant.now().minusNanos(lockPeriod.toNanos());
+        Criteria lastModifiedAt = Criteria.where("lastModifiedAt").lt(expiredFrom);
+        Criteria expired = new Criteria().andOperator(id, lockedBy, version, stateLocked, lastModifiedAt);
+        Criteria releasedOrExpired = new Criteria().orOperator(released, expired);
+        return Try
+                .of(() ->
+                        mongoTemplate.update(Lock.class)
+                                .matching(Query.query(releasedOrExpired))
+                                .apply(Update.update("state", Lock.State.LOCKED).set("lastModifiedAt", Instant.now()))
+                                .findAndModify()
+                )
+                .onSuccess(o -> log.debug(o.map(unused -> "Existing lock acquired").orElse("Wasn't able to acquire existing lock")))
+                .onFailure(throwable -> log.error("Error occurred on acquiring of existing lock: {}", throwable::getMessage))
+                .getOrElseThrow(throwable -> new LockException(throwable));
     }
 
     /**
      * A vavr.io {@link Try} to supply execution and release a lock after all.
      *
-     * @param lockId    - {@link Lock} entity ID for release
+     * @param lock      - {@link Lock} to be released
      * @param execution - {@link CheckedRunnable} for execution
      * @return {@link Optional} of type {@link Void}
      */
-    <T> Optional<T> executeAndRelease(String lockId, CheckedFunction0<T> execution) {
+    <T> Optional<T> executeAndRelease(Lock lock, CheckedFunction0<T> execution) {
         return Try.of(execution)
-                .andFinallyTry(() -> release(lockId))
+                .andFinallyTry(() -> release(lock.id))
                 .onFailure(throwable -> log.error("Execution error: {}", throwable::getMessage))
                 .onSuccess(result -> log.debug("Execution result: {}", result))
                 .toJavaOptional();
@@ -280,13 +311,13 @@ public class DistributedLock {
     /**
      * A vavr.io {@link Try} to execute runnable and release a lock after all.
      *
-     * @param lockId   - {@link Lock} entity ID for release
+     * @param lock     - {@link Lock} to be released
      * @param runnable - {@link CheckedRunnable} for execution
      * @return {@link Optional} of type {@link Boolean} with true if run was successful and false otherwise
      */
-    Optional<Boolean> runAndRelease(String lockId, CheckedRunnable runnable) {
+    Optional<Boolean> runAndRelease(Lock lock, CheckedRunnable runnable) {
         return Try.run(runnable)
-                .andFinallyTry(() -> release(lockId))
+                .andFinallyTry(() -> release(lock.id))
                 .onFailure(throwable -> log.error("Run error: {}", throwable::getMessage))
                 .map(unused -> true)
                 .recover(throwable -> false)
