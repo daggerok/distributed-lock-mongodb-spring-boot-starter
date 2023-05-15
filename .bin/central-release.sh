@@ -84,11 +84,7 @@ echo "Deploying $VERSION release..."
 cd "${ROOT_PROJECT_DIR}" && ./mvnw -P central-release clean deploy "${ARGS}"
 
 echo "Creating $VERSION GitHub tag..."
-if [[ "${QUALIFIER}" == "undefined" ]] ; then
-  cd "${ROOT_PROJECT_DIR}" && git tag "${VERSION}" ; git push origin "${VERSION}"
-else
-  cd "${ROOT_PROJECT_DIR}" && git tag "${VERSION}-${QUALIFIER}" ; git push origin "${VERSION}-${QUALIFIER}"
-fi
+cd "${ROOT_PROJECT_DIR}" && git tag "${VERSION}" ; git push origin "${VERSION}"
 
 echo "Create new snapshot version for next development iteration..."
 cd "${ROOT_PROJECT_DIR}" && ./mvnw build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT
