@@ -41,7 +41,7 @@ public class Lock {
 
     Instant lastModifiedAt;
 
-    Duration lockPeriod;
+    String lockPeriodDuration;
 
     State state;
 
@@ -50,13 +50,13 @@ public class Lock {
      * <p>
      * Use description as a comment for information to additionally identify who was acquired a specific lock.
      * <p>
-     * Use lock period to override defaults. Lock period is going to be use in addition to {@link Lock.State}
+     * Use lock period to override defaults. Lock period is going to be use in addition to {@link State}
      * to detect if it was expired in case if server was shutdown before acquired lock release.
      * <p>
      * All non-nullable identifiers will be represented with {@link Object#toString()} and joined with dash separator.
      *
      * @param description - optional description, for example lockedBy IP address
-     * @param lockPeriod - optional lock period, in null default lock period is going to be used instead
+     * @param lockPeriod  - optional lock period, in null default lock period is going to be used instead
      * @param identifiers - identifier, at lease one non nullable is required
      * @return {@link Lock} configuration
      */
@@ -67,18 +67,19 @@ public class Lock {
         String lockedBy = Arrays.stream(items).filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("-"));
         if (lockedBy.isEmpty()) throw LockException.lockIdentifierIsRequired();
 
-        return new Lock(null, null, lockedBy, description, null, null, lockPeriod, State.NONE);
+        String lockPeriodDuration = Optional.ofNullable(lockPeriod).map(Duration::toString).orElse(null);
+        return new Lock(null, null, lockedBy, description, null, null, lockPeriodDuration, State.NONE);
     }
 
     /**
      * Creates a lock configuration by its identifier and optional lock period.
      * <p>
-     * Use lock period to override defaults. Lock period is going to be use in addition to {@link Lock.State}
+     * Use lock period to override defaults. Lock period is going to be use in addition to {@link State}
      * to detect if it was expired in case if server was shutdown before acquired lock release.
      * <p>
      * All non-nullable identifiers will be represented with {@link Object#toString()} and joined with dash separator.
      *
-     * @param lockPeriod - optional lock period, in null default lock period is going to be used instead
+     * @param lockPeriod  - optional lock period, in null default lock period is going to be used instead
      * @param identifiers - identifier, at lease one non nullable is required
      * @return {@link Lock} configuration
      */
@@ -98,6 +99,10 @@ public class Lock {
     @SafeVarargs
     public static <T extends Serializable> Lock of(T... identifiers) {
         return Lock.of(null, identifiers);
+    }
+
+    public Duration getLockPeriod() {
+        return Optional.ofNullable(lockPeriodDuration).map(Duration::parse).orElse(null);
     }
 
     public enum State {
