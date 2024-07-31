@@ -29,6 +29,6 @@ public class DistributedLockAutoConfiguration {
     @ConditionalOnMissingBean
     public DistributedLock distributedLock(MongoTemplate mongoTemplate, DistributedLockProperties props) {
         log.info("Initializing DistributedLock(mongoTemplate={}, props={})", mongoTemplate, props);
-        return new DistributedLock(props.getLockPeriod(), mongoTemplate);
+        return new DistributedLock(props.getLockCollectionName(), props.getLockPeriod(), mongoTemplate);
     }
 }

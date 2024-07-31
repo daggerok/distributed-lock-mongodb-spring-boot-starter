@@ -1,9 +1,10 @@
 # Publish artifacts to maven central repository
 
-To publish your artifacts into maven central repository you have to prepare your java project repo accordingly:
-
+To publish your artifacts into maven central repository, you have to prepare your java project repo accordingly:
+* Go to https://s01.oss.sonatype.org/#profile;User%20Token in your profile to get token-username and token-password for
+  `settings.xml` file, servers/server section
 * Create JIRA and requires to create repository for you.
-  After JIRA gets created you must create empty public repository like these:
+  After JIRA gets created, you must create an empty public repository like these:
   * https://github.com/daggerok/OSSRH-81403
   * https://github.com/daggerok/OSSRH-90442
 * Update your [pom.xml](pom.xml) file with next information:

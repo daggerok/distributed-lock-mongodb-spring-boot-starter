@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -32,8 +33,8 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
 
     @BeforeEach
     void before_each() {
-        if (mongoTemplate.collectionExists(Lock.class)) {
-            mongoTemplate.remove(Lock.class);
+        if (mongoTemplate.collectionExists(props.getLockCollectionName())) {
+            mongoTemplate.remove(new Query(), props.getLockCollectionName());
         }
     }
 
@@ -172,7 +173,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .withLockedAt(Instant.now().minusSeconds(5))
                 .withLastModifiedAt(Instant.now())
                 .withState(Lock.State.LOCKED);
-        Lock locked = mongoTemplate.insert(lockedConfig);
+        Lock locked = mongoTemplate.insert(lockedConfig, props.getLockCollectionName());
         log.info("now is: {} locked: {}", Instant.now(), locked);
 
         // and
@@ -195,7 +196,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .withLockedAt(Instant.now().minusSeconds(5))
                 .withLastModifiedAt(Instant.now())
                 .withState(Lock.State.NONE);
-        Lock unlocked = mongoTemplate.insert(unlockedConfig);
+        Lock unlocked = mongoTemplate.insert(unlockedConfig, props.getLockCollectionName());
         log.info("now is: {} unlocked: {}", Instant.now(), unlocked);
 
         // and
@@ -218,7 +219,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
         Instant lockedAt = now.minusNanos(props.getLockPeriod().toNanos());
         Lock expired = Lock.of("should_acquire_expired_lock_and_get")
                 .withState(Lock.State.LOCKED).withLockedAt(lockedAt).withLastModifiedAt(lockedAt);
-        Lock existingExpiredLock = mongoTemplate.insert(expired);
+        Lock existingExpiredLock = mongoTemplate.insert(expired, props.getLockCollectionName());
         log.info("now is: {} existingExpiredLock: {}", Instant.now(), existingExpiredLock);
 
         // and
@@ -297,7 +298,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .withLockedAt(Instant.now().minusSeconds(5))
                 .withLastModifiedAt(Instant.now())
                 .withState(Lock.State.LOCKED);
-        Lock locked = mongoTemplate.insert(lockedConfig);
+        Lock locked = mongoTemplate.insert(lockedConfig, props.getLockCollectionName());
         log.info("now is: {} locked: {}", Instant.now(), locked);
 
         // and
@@ -320,7 +321,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .withLockedAt(Instant.now().minusSeconds(5))
                 .withLastModifiedAt(Instant.now())
                 .withState(Lock.State.NONE);
-        Lock unlocked = mongoTemplate.insert(unlockedConfig);
+        Lock unlocked = mongoTemplate.insert(unlockedConfig, props.getLockCollectionName());
         log.info("now is: {} unlocked: {}", Instant.now(), unlocked);
 
         // and
@@ -346,7 +347,7 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
         Instant lockedAt = now.minusNanos(props.getLockPeriod().toNanos());
         Lock expired = Lock.of("should_acquire_expired_lock_and_run").withState(Lock.State.LOCKED)
                 .withLockedAt(lockedAt).withLastModifiedAt(lockedAt);
-        Lock existingExpiredLock = mongoTemplate.insert(expired);
+        Lock existingExpiredLock = mongoTemplate.insert(expired, props.getLockCollectionName());
         log.info("now is: {} existingExpiredLock: {}", Instant.now(), existingExpiredLock);
 
         // and
