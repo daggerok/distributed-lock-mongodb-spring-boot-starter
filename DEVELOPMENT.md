@@ -17,8 +17,8 @@ To support different Spring Boot versions it's important to keep track next summ
     val someVariable = // ...
     ```
 * in `.github/workflows/*.yaml` files:
-  * use `strategy.matrix.java: [17, 20]` for java 17 branch
-  * use `strategy.matrix.java: [8, 11, 17, 20]` for java 8 branch
+  * use `strategy.matrix.java: [17, 21, 22]` for java 17 branch
+  * use `strategy.matrix.java: [8, 11, 17, 21, 22]` for java 8 branch
 * in `io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties` class
   don't use `@ConstructorBinding` annotation starting from Spring Boot version 3.0.x
 * starting from Spring Boot version 2.7.x instead of using `src/main/resources/META-INF/spring.factories` file
@@ -45,7 +45,9 @@ To support different Spring Boot versions it's important to keep track next summ
 ## Run and test example application
 
 ```bash
-#brew reinstall httpie jq
+#brew reinstall httpie jq                                     # if you don't have httpie / jq installed
+sudo rm -rfv /var/run/docker.sock                            # if after all you cannot start a docker
+sudo ln -s -v ~/.docker/run/docker.sock /var/run/docker.sock # if you have maven run docker testcontainers problems
 
 killall -9 java
 ./mvnw -f docker docker:stop
@@ -65,4 +67,6 @@ http -I post :8080/post-state/daggerok/but-now-this-should-work
 
 ./mvnw -f distributed-lock-mongodb-spring-boot-starter-example spring-boot:stop
 ./mvnw -f docker                                                    docker:stop
+
+sudo rm -rfv /var/run/docker.sock
 ```
