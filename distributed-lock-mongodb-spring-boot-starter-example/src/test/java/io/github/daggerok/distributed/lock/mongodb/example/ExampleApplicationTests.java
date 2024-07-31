@@ -2,6 +2,7 @@ package io.github.daggerok.distributed.lock.mongodb.example;
 
 import io.github.daggerok.distributed.lock.mongodb.AbstractTestcontainersTests;
 import io.github.daggerok.distributed.lock.mongodb.Lock;
+import io.github.daggerok.distributed.lock.mongodb.autoconfigure.DistributedLockProperties;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
@@ -32,10 +34,13 @@ class ExampleApplicationTests extends AbstractTestcontainersTests {
     Integer port;
 
     @Autowired
-    TestRestTemplate testRestTemplate;
+    MongoTemplate mongoTemplate;
 
     @Autowired
-    MongoTemplate mongoTemplate;
+    DistributedLockProperties props;
+
+    @Autowired
+    TestRestTemplate testRestTemplate;
 
     Function<String, String> url = path -> {
         Objects.requireNonNull(path, "path may not be null");
@@ -47,8 +52,8 @@ class ExampleApplicationTests extends AbstractTestcontainersTests {
     void should_do_integration_test() {
         // given no state nor lock
         Stream.of(Lock.class, LastMessage.class).forEach(type -> {
-            if (mongoTemplate.collectionExists(Lock.class)) {
-                mongoTemplate.remove(Lock.class);
+            if (mongoTemplate.collectionExists(props.getLockCollectionName())) {
+                mongoTemplate.remove(new Query(), props.getLockCollectionName());
             }
         });
 

@@ -25,6 +25,7 @@ public class DistributedLock {
 
     private static final Function<Lock, Criteria> lockedBy = lock -> Criteria.where("lockedBy").is(lock.lockedBy);
 
+    private final String lockCollectionName;
     private final Duration defaultLockPeriod;
     private final MongoTemplate mongoTemplate;
 
@@ -175,6 +176,7 @@ public class DistributedLock {
     public Optional<Lock> release(String lockId) {
         String id = Optional.ofNullable(lockId).orElseThrow(LockException::lockIdIsRequired);
         Optional<Lock> maybePrevious = mongoTemplate.update(Lock.class)
+                .inCollection(lockCollectionName)
                 .matching(Query.query(Criteria.where("id").is(id)))
                 .apply(Update.update("state", Lock.State.NONE).set("lastModifiedAt", Instant.now()))
                 .findAndModify();
@@ -195,7 +197,7 @@ public class DistributedLock {
         return previous.map(Lock::getId)
                 .map(Criteria.where("id")::is)
                 .map(Query::query)
-                .map(mongoTemplate.query(Lock.class)::matching)
+                .map(mongoTemplate.query(Lock.class).inCollection(lockCollectionName)::matching)
                 .flatMap(ExecutableFindOperation.TerminatingFind::one);
     }
 
@@ -227,7 +229,9 @@ public class DistributedLock {
      * @return {@link Optional} of type {@link Lock} for given {@link Lock} config
      */
     Optional<Lock> findExistingLock(Lock config) {
-        Optional<Lock> maybeLock = mongoTemplate.query(Lock.class).matching(Query.query(lockedBy.apply(config))).one();
+        Optional<Lock> maybeLock = mongoTemplate.query(Lock.class).inCollection(lockCollectionName)
+                .matching(Query.query(lockedBy.apply(config)))
+                .one();
 
         maybeLock.ifPresent(lock -> {
             boolean isReleased = lock.state == Lock.State.NONE;
@@ -252,7 +256,7 @@ public class DistributedLock {
      */
     Optional<Lock> createNewLock(Lock lock) {
         Index indexToEnsure = new Index("lockedBy", Sort.Direction.ASC).named("Lock_lockedBy").unique();
-        String index = mongoTemplate.indexOps(Lock.class).ensureIndex(indexToEnsure);
+        String index = mongoTemplate.indexOps(lockCollectionName, Lock.class).ensureIndex(indexToEnsure);
         log.debug("Ensured index {} exists", index);
 
         Duration lockPeriod = Optional.ofNullable(lock.getLockPeriod()).orElse(defaultLockPeriod);
@@ -262,7 +266,7 @@ public class DistributedLock {
                 .withLockedAt(now)
                 .withLastModifiedAt(now)
                 .withLockPeriodDuration(lockPeriod.toString());
-        return Try.of(() -> mongoTemplate.insert(toAcquire))
+        return Try.of(() -> mongoTemplate.insert(toAcquire, lockCollectionName))
                 .onSuccess(acquired -> log.debug("New lock created and acquired: {}", acquired))
                 .onFailure(throwable -> log.error("New lock creation error: {}", throwable::getMessage))
                 .toJavaOptional();
@@ -290,6 +294,7 @@ public class DistributedLock {
         return Try
                 .of(() ->
                         mongoTemplate.update(Lock.class)
+                                .inCollection(lockCollectionName)
                                 .matching(Query.query(releasedOrExpired))
                                 .apply(Update.update("state", Lock.State.LOCKED).set("lastModifiedAt", Instant.now()))
                                 .findAndModify()
