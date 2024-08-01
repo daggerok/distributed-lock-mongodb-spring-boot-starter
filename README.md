@@ -5,20 +5,19 @@ maven module to help run example showcase application uses mongo docker containe
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.daggerok/distributed-lock-mongodb-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.daggerok%22%20AND%20a:%22distributed-lock-mongodb-spring-boot-starter%22)
 
-## Versions convention
+## Versions
 
-We support next version convention:
-
-| Distributed Lock version | Spring Boot version | GitHub branch     |
-|--------------------------|---------------------|-------------------|
-| 3.0.13                   | 3.0.13              | master            |
-| 2.7.18                   | 2.7.18              | spring-boot-2.7.x |
-| 2.6.14-4                 | 2.6.14              | spring-boot-2.6.x |
-| 2.5.14-4                 | 2.5.14              | spring-boot-2.5.x |
-| 2.4.13-4                 | 2.4.13              | spring-boot-2.4.x |
-| 2.3.12-4                 | 2.3.12.RELEASE      | spring-boot-2.3.x |
-| 2.2.13-4                 | 2.2.13.RELEASE      | spring-boot-2.2.x |
-| 2.1.18-4                 | 2.1.18.RELEASE      | spring-boot-2.1.x |
+| Distributed Lock version | Spring Boot version | GitHub branch             |
+|--------------------------|---------------------|---------------------------|
+| 3.1.12                   | 3.1.12              | master, spring-boot-3.1.x |
+| 3.0.13                   | 3.0.13              | spring-boot-3.0.x         |
+| 2.7.18                   | 2.7.18              | spring-boot-2.7.x         |
+| 2.6.14-4                 | 2.6.14              | spring-boot-2.6.x         |
+| 2.5.14-4                 | 2.5.14              | spring-boot-2.5.x         |
+| 2.4.13-4                 | 2.4.13              | spring-boot-2.4.x         |
+| 2.3.12-4                 | 2.3.12.RELEASE      | spring-boot-2.3.x         |
+| 2.2.13-4                 | 2.2.13.RELEASE      | spring-boot-2.2.x         |
+| 2.1.18-4                 | 2.1.18.RELEASE      | spring-boot-2.1.x         |
 
 ## Installation
 
@@ -63,22 +62,22 @@ Feel free to simply inject it by defined single constructor in your spring Bean:
 public class MyService {
 
     @Autowired
-    private MyService myService;
+    private DistributedLock distributedLock;
 
     // skipped...
 }
 ```
 
-Or you can inject it using `@Auqtowired annotation` by field injection (not recommended):
+You can inject it using `@Auqtowired annotation` by field injection (not recommended):
 
 ```java
 @Service
 public class MyService {
 
-    private final MyService myService;
+    private final DistributedLock distributedLock;
 
-    public MyService(MyService myService) {
-        this.myService = myService;
+    public MyService(DistributedLock distributedLock) {
+        this.distributedLock = distributedLock;
     }
 
     // skipped...
@@ -135,4 +134,12 @@ Acquire lock and supply value (only if lock was acquired)
 ```java
 Optional<SyncResult> syncResult = distributedLock.acquireAndGet(Lock.of("ETL"), () -> syncService.etl());
 maybeResult.ifPresent(result -> log.debug("Synchronization complete with: {}", result));
+```
+
+There are Lock object configurations available, but the easier way to acquire lock would be simply using identifier:
+
+```java
+distributedLock
+        .acquireAndGet("user-123", () -> userService.update(user))
+        .ifPresent(unused -> log.debug("User(id=123) has been updated"));
 ```
