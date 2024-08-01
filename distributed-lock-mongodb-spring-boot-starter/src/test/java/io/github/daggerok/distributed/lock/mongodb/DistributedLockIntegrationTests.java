@@ -58,6 +58,12 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
 
+        // when execution with 2 null args (lockPeriod and identifiers) cast to (Serializable[]) explicitly
+        assertThatThrownBy(() -> distributedLock.acquire(null, (Serializable[]) null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
         // when execution with 3 null args (lockPeriod and nullable identifiers)
         assertThatThrownBy(() -> distributedLock.acquire("description", null, null, null))
                 // then
@@ -153,8 +159,20 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
 
+        // when lock identifiers vararg array is null cast to Serializable[] explicitly
+        assertThatThrownBy(() -> distributedLock.acquireAndGet(Lock.of((Serializable[]) null), null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
         // when lock period and identifiers vararg array are nulls
         assertThatThrownBy(() -> distributedLock.acquireAndGet(Lock.of(null, null), null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
+        // when lock period and identifiers vararg array are nulls cast to Serializable explicitly
+        assertThatThrownBy(() -> distributedLock.acquireAndGet(Lock.of(null, (Serializable) null), null))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
@@ -277,15 +295,26 @@ class DistributedLockIntegrationTests extends AbstractTestcontainersTests {
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
 
+        // when lock identifiers vararg array is null cast to Serializable[] explicitly
+        assertThatThrownBy(() -> distributedLock.acquireAndRun(Lock.of((Serializable[]) null), null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
         // when lock period and identifiers vararg array are nulls
         assertThatThrownBy(() -> distributedLock.acquireAndRun(Lock.of(null, null), null))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock by identifier is required");
 
+        // when lock period and identifiers vararg array are nulls cast to Serializable explicitly
+        assertThatThrownBy(() -> distributedLock.acquireAndRun(Lock.of(null, (Serializable) null), null))
+                // then
+                .isInstanceOf(LockException.class)
+                .hasMessage("lock by identifier is required");
+
         // when lock config is null
-        assertThatThrownBy(() -> distributedLock.acquireAndRun(null, () -> {
-        }))
+        assertThatThrownBy(() -> distributedLock.acquireAndRun(null, () -> {}))
                 // then
                 .isInstanceOf(LockException.class)
                 .hasMessage("lock is required");
