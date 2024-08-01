@@ -8,3 +8,4 @@ logging:
     io.github.daggerok: trace
 io.github.daggerok.distributed.lock.mongodb:
   lock-period: 2m
+  lock-collection-name: my-distributed-lock-collection

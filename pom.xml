@@ -45,7 +45,7 @@
     <scm>
         <developerConnection>scm:git:git@github.com:daggerok/distributed-lock-mongodb-spring-boot-starter.git</developerConnection>
         <connection>scm:git:https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter.git</connection>
-        <url>https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter</url>
+        <url>https://github.com/daggerok/distributed-lock-mongodb-spring-boot-starter/tree/master</url>
         <!-- <tag>master</tag> -->
         <tag>HEAD</tag>
     </scm>
@@ -332,6 +332,10 @@
                     <id>ossrh</id>
                     <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
             </distributionManagement>
             <build>
                 <defaultGoal>clean deploy</defaultGoal>
@@ -343,6 +347,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
+                            <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
                             <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                             <tags>

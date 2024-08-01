@@ -45,7 +45,7 @@ To support different Spring Boot versions it's important to keep track next summ
 ## Run and test example application
 
 ```bash
-#brew reinstall httpie jq                                     # if you don't have httpie / jq installed
+#brew reinstall httpie jq                                    # if you don't have httpie / jq installed
 sudo rm -rfv /var/run/docker.sock                            # if after all you cannot start a docker
 sudo ln -s -v ~/.docker/run/docker.sock /var/run/docker.sock # if you have maven run docker testcontainers problems
 
