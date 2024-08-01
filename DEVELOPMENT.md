@@ -49,6 +49,7 @@ To support different Spring Boot versions it's important to keep track next summ
 sudo rm -rfv /var/run/docker.sock                            # if after all you cannot start a docker
 sudo ln -s -v ~/.docker/run/docker.sock /var/run/docker.sock # if you have maven run docker testcontainers problems
 
+use jdk 17
 killall -9 java
 ./mvnw -f docker docker:stop
 rm -rfv ~/.m2/repository/io/github/daggerok/distributed-lock-mongodb-spring-boot-starter
