@@ -9,7 +9,8 @@ maven module to help run example showcase application uses mongo docker containe
 
 | Distributed Lock | Spring Boot    | GitHub branch     |
 |------------------|----------------|-------------------|
-| 3.2.8            | 3.2.8          | master            |
+| 3.3.2            | 3.3.2          | master            |
+| 3.2.8            | 3.2.8          | spring-boot-3.2.x |
 | 3.1.12           | 3.1.12         | spring-boot-3.1.x |
 | 3.0.13           | 3.0.13         | spring-boot-3.0.x |
 | 2.7.18           | 2.7.18         | spring-boot-2.7.x |
