@@ -69,36 +69,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-docker</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-testcontainers</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
-                <groupId>io.github.daggerok</groupId>
-                <artifactId>distributed-lock-mongodb-spring-boot-starter-example</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -197,15 +167,6 @@
         </plugins>
     </reporting>
     <profiles>
-        <profile>
-            <id>java17-requires-jackarta-servlet</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <properties>
-                <jakarta-servlet.version>5.0.0</jakarta-servlet.version>
-            </properties>
-        </profile>
         <profile>
             <id>read gpg.passphrase system property</id>
             <!--
