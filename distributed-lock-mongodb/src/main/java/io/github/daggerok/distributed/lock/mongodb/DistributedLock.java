@@ -268,7 +268,7 @@ public class DistributedLock {
                 .withLockPeriodDuration(lockPeriod.toString());
         return Try.of(() -> mongoTemplate.insert(toAcquire, lockCollectionName))
                 .onSuccess(acquired -> log.debug("New lock created and acquired: {}", acquired))
-                .onFailure(throwable -> log.error("New lock creation error: {}", throwable::getMessage))
+                .onFailure(throwable -> log.error("New lock creation error: {}", throwable.getMessage()))
                 .toJavaOptional();
     }
 
@@ -299,8 +299,9 @@ public class DistributedLock {
                                 .apply(Update.update("state", Lock.State.LOCKED).set("lastModifiedAt", Instant.now()))
                                 .findAndModify()
                 )
-                .onSuccess(o -> log.debug(o.map(unused -> "Existing lock acquired").orElse("Wasn't able to acquire existing lock")))
-                .onFailure(throwable -> log.error("Error occurred on acquiring of existing lock: {}", throwable::getMessage))
+                .onSuccess(o -> log.debug(o.map(aLock -> String.format("Existing lock %s acquired", aLock))
+                        .orElse("Wasn't able to acquire existing lock")))
+                .onFailure(throwable -> log.error("Error occurred on acquiring of existing lock: {}", throwable.getMessage()))
                 .getOrElseThrow(throwable -> new LockException(throwable));
     }
 
@@ -314,7 +315,7 @@ public class DistributedLock {
     <T> Optional<T> executeAndRelease(Lock lock, CheckedFunction0<T> execution) {
         return Try.of(execution)
                 .andFinallyTry(() -> release(lock.id))
-                .onFailure(throwable -> log.error("Execution error: {}", throwable::getMessage))
+                .onFailure(throwable -> log.error("Execution error: {}", throwable.getMessage()))
                 .onSuccess(result -> log.debug("Execution result: {}", result))
                 .toJavaOptional();
     }
@@ -329,7 +330,7 @@ public class DistributedLock {
     Optional<Boolean> runAndRelease(Lock lock, CheckedRunnable runnable) {
         return Try.run(runnable)
                 .andFinallyTry(() -> release(lock.id))
-                .onFailure(throwable -> log.error("Run error: {}", throwable::getMessage))
+                .onFailure(throwable -> log.error("Run error: {}", throwable.getMessage()))
                 .map(unused -> true)
                 .recover(throwable -> false)
                 .toJavaOptional();
